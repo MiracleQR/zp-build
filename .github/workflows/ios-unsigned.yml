@@ -15,24 +15,7 @@ jobs:
         run: git clone --depth 1 https://github.com/jaminxx-aha/ZPill.git src
 
       - name: Patch ohos-only symbol for official Flutter SDK
-        working-directory: src
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path('lib/platform/video_player.dart')
-          s = p.read_text()
-          old = """  if (Platform.operatingSystem == 'ohos') {
-    return OhosView(
-      viewType: 'zpill/video-view',
-      onPlatformViewCreated: onCreated,
-    );
-  }
-"""
-          if old not in s:
-              raise SystemExit('patch target not found')
-          p.write_text(s.replace(old, '  // OhosView exists only in the OpenHarmony Flutter fork.\n'))
-          print('patched video_player.dart')
-          PY
+        run: python3 .github/patch_ohos.py src
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
