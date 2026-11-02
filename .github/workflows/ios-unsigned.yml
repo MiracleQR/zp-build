@@ -11,6 +11,8 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 40
     steps:
+      - uses: actions/checkout@v4
+
       - name: Clone ZPill source
         run: git clone --depth 1 https://github.com/jaminxx-aha/ZPill.git src
 
