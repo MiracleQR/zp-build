@@ -1,0 +1,47 @@
+name: Build unsigned iOS IPA
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - name: Clone ZPill source
+        run: git clone --depth 1 https://github.com/jaminxx-aha/ZPill.git src
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Show versions
+        run: |
+          flutter --version
+          xcodebuild -version
+
+      - name: Build iOS without codesign
+        working-directory: src
+        run: |
+          flutter pub get
+          flutter build ios --release --no-codesign
+
+      - name: Package into IPA
+        working-directory: src
+        run: |
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          zip -qry ZPill-unsigned.ipa Payload
+          ls -lh ZPill-unsigned.ipa
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZPill-unsigned-ipa
+          path: src/ZPill-unsigned.ipa
+          if-no-files-found: error
